@@ -46,7 +46,7 @@ class TimelineOrganizerServiceTest {
         Path timelineDir = tempDir.resolve("timeline");
         Files.createDirectories(timelineDir);
 
-        when(config.getFinalOutputDir()).thenReturn(timelineDir.toString());
+        when(config.getTimelineDir()).thenReturn(timelineDir.toString());
 
         Calendar cal = Calendar.getInstance();
         cal.set(2026, Calendar.FEBRUARY, 8, 10, 0, 0);
@@ -72,7 +72,7 @@ class TimelineOrganizerServiceTest {
         Path existingFile = existingFileDir.resolve("2026-02-08-10-00-00.jpg");
         Files.writeString(existingFile, "content"); // Same content -> same hash
 
-        when(config.getFinalOutputDir()).thenReturn(timelineDir.toString());
+        when(config.getTimelineDir()).thenReturn(timelineDir.toString());
 
         Calendar cal = Calendar.getInstance();
         cal.set(2026, Calendar.FEBRUARY, 8, 10, 0, 0);
@@ -99,7 +99,7 @@ class TimelineOrganizerServiceTest {
         Path existingFile = existingFileDir.resolve("2026-02-08-10-00-00.jpg");
         Files.writeString(existingFile, "content1"); // Different content -> different hash
 
-        when(config.getFinalOutputDir()).thenReturn(timelineDir.toString());
+        when(config.getTimelineDir()).thenReturn(timelineDir.toString());
 
         Calendar cal = Calendar.getInstance();
         cal.set(2026, Calendar.FEBRUARY, 8, 10, 0, 0);

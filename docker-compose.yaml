@@ -6,12 +6,12 @@ services:
     container_name: photosono
     volumes:
       - /Users/christian/photosono-pics/input:/input
-      - /Users/christian/photosono-pics/output-unique:/output
+      - /Users/christian/photosono-pics/output:/output
       - /Users/christian/photosono-pics/timeline:/timeline
     environment:
       - PHOTOSONO_INPUT_DIR=/input
-      - PHOTOSONO_OUTPUT_DIR=/output-unique
-      - PHOTOSONO_FINAL_OUTPUT_DIR=/timeline
+      - PHOTOSONO_OUTPUT_DIR=/output
+      - PHOTOSONO_TIMELINE_DIR=/timeline
       - PHOTOSONO_DEDUPLICATION_ENABLED=true
       - PHOTOSONO_DEDUPLICATION_SCAN_INTERVAL=PT30S
       - PHOTOSONO_TIMELINE_ENABLED=true

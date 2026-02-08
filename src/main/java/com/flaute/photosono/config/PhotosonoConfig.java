@@ -9,7 +9,7 @@ public class PhotosonoConfig {
 
     private String inputDir;
     private String outputDir;
-    private String finalOutputDir;
+    private String timelineDir;
     private Deduplication deduplication = new Deduplication();
     private Timeline timeline = new Timeline();
 
@@ -29,12 +29,12 @@ public class PhotosonoConfig {
         this.outputDir = outputDir;
     }
 
-    public String getFinalOutputDir() {
-        return finalOutputDir;
+    public String getTimelineDir() {
+        return timelineDir;
     }
 
-    public void setFinalOutputDir(String finalOutputDir) {
-        this.finalOutputDir = finalOutputDir;
+    public void setTimelineDir(String timelineDir) {
+        this.timelineDir = timelineDir;
     }
 
     public Deduplication getDeduplication() {

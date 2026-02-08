@@ -45,7 +45,7 @@ public class TimelineOrganizerService {
             String baseFileName = fileFormatter.format(date);
             String extension = getExtension(source);
 
-            Path targetDir = Paths.get(config.getFinalOutputDir(), datePath);
+            Path targetDir = Paths.get(config.getTimelineDir(), datePath);
             Files.createDirectories(targetDir);
 
             Optional<Path> targetFile = resolveTargetFile(source, targetDir, baseFileName, extension);
