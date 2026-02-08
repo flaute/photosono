@@ -1,0 +1,14 @@
+services:
+  photosono:
+    build: .
+    container_name: photosono
+    volumes:
+      - ./input:/input
+      - ./output-unique:/output
+      - ./timeline:/timeline
+    environment:
+      - PHOTOSONO_INPUT_DIR=/input
+      - PHOTOSONO_OUTPUT_DIR=/output
+      - PHOTOSONO_FINAL_OUTPUT_DIR=/timeline
+      - PHOTOSONO_SCAN_INTERVAL=PT1M
+    restart: unless-stopped
