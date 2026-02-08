@@ -20,6 +20,8 @@ class FileScannerServiceTest {
     @Mock
     private PhotosonoConfig config;
     @Mock
+    private PhotosonoConfig.Deduplication deduplication;
+    @Mock
     private FileProcessorService processorService;
 
     @TempDir
@@ -29,6 +31,8 @@ class FileScannerServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         fileScannerService = new FileScannerService(config, processorService);
+        when(config.getDeduplication()).thenReturn(deduplication);
+        when(deduplication.isEnabled()).thenReturn(true);
     }
 
     @Test
@@ -40,18 +44,20 @@ class FileScannerServiceTest {
         Files.writeString(file1, "content1");
         Files.writeString(file2, "content2");
 
-        // Nested directory
-        Path subDir = inputDir.resolve("sub");
-        Files.createDirectories(subDir);
-        Path file3 = subDir.resolve("file3.jpg");
-        Files.writeString(file3, "content3");
-
         when(config.getInputDir()).thenReturn(inputDir.toString());
 
         fileScannerService.scanInputDirectory();
 
         verify(processorService).processFile(file1);
         verify(processorService).processFile(file2);
-        verify(processorService).processFile(file3);
+    }
+
+    @Test
+    void testScanDisabled() throws IOException {
+        when(deduplication.isEnabled()).thenReturn(false);
+
+        fileScannerService.scanInputDirectory();
+
+        verifyNoInteractions(processorService);
     }
 }

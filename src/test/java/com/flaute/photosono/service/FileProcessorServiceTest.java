@@ -22,8 +22,6 @@ class FileProcessorServiceTest {
     @Mock
     private PhotosonoConfig config;
     @Mock
-    private TimelineOrganizerService organizerService;
-    @Mock
     private HashService hashService;
 
     @TempDir
@@ -32,7 +30,7 @@ class FileProcessorServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        fileProcessorService = new FileProcessorService(config, organizerService, hashService);
+        fileProcessorService = new FileProcessorService(config, hashService);
     }
 
     @Test
@@ -51,8 +49,6 @@ class FileProcessorServiceTest {
         // Expected path: output/a/a/aabbccddeeff.jpg
         Path expectedPath = outputBaseDir.resolve("a/a/aabbccddeeff.jpg");
         assertTrue(Files.exists(expectedPath));
-
-        verify(organizerService).organizeFile(expectedPath);
     }
 
     @Test
@@ -62,7 +58,8 @@ class FileProcessorServiceTest {
 
         fileProcessorService.processFile(inputFile);
 
-        // Should not call organizer service
-        verifyNoInteractions(organizerService);
+        // Should not create any output
+        Path outputBaseDir = tempDir.resolve("output");
+        assertTrue(!Files.exists(outputBaseDir));
     }
 }

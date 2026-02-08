@@ -25,9 +25,13 @@ public class FileScannerService {
         this.processorService = processorService;
     }
 
-    @Scheduled(fixedDelayString = "${photosono.scan-interval:PT10S}")
+    @Scheduled(fixedDelayString = "${photosono.deduplication.scan-interval:PT10S}")
     public void scanInputDirectory() {
-        logger.info("Scanning input directory: {}", config.getInputDir());
+        if (!config.getDeduplication().isEnabled()) {
+            return;
+        }
+
+        logger.info("Scanning input directory for deduplication: {}", config.getInputDir());
         Path inputPath = Paths.get(config.getInputDir());
 
         if (!Files.exists(inputPath)) {

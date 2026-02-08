@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   photosono:
     build: .
@@ -8,7 +10,10 @@ services:
       - /Users/christian/photosono-pics/timeline:/timeline
     environment:
       - PHOTOSONO_INPUT_DIR=/input
-      - PHOTOSONO_OUTPUT_DIR=/output
+      - PHOTOSONO_OUTPUT_DIR=/output-unique
       - PHOTOSONO_FINAL_OUTPUT_DIR=/timeline
-      - PHOTOSONO_SCAN_INTERVAL=PT1M
+      - PHOTOSONO_DEDUPLICATION_ENABLED=true
+      - PHOTOSONO_DEDUPLICATION_SCAN_INTERVAL=PT30S
+      - PHOTOSONO_TIMELINE_ENABLED=true
+      - PHOTOSONO_TIMELINE_SCAN_INTERVAL=PT1M
     restart: unless-stopped

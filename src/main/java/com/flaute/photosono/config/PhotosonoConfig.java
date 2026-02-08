@@ -10,7 +10,8 @@ public class PhotosonoConfig {
     private String inputDir;
     private String outputDir;
     private String finalOutputDir;
-    private String scanInterval = "PT10S"; // Default 10 seconds
+    private Deduplication deduplication = new Deduplication();
+    private Timeline timeline = new Timeline();
 
     public String getInputDir() {
         return inputDir;
@@ -36,11 +37,61 @@ public class PhotosonoConfig {
         this.finalOutputDir = finalOutputDir;
     }
 
-    public String getScanInterval() {
-        return scanInterval;
+    public Deduplication getDeduplication() {
+        return deduplication;
     }
 
-    public void setScanInterval(String scanInterval) {
-        this.scanInterval = scanInterval;
+    public void setDeduplication(Deduplication deduplication) {
+        this.deduplication = deduplication;
+    }
+
+    public Timeline getTimeline() {
+        return timeline;
+    }
+
+    public void setTimeline(Timeline timeline) {
+        this.timeline = timeline;
+    }
+
+    public static class Deduplication {
+        private boolean enabled = true;
+        private String scanInterval = "PT10S";
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getScanInterval() {
+            return scanInterval;
+        }
+
+        public void setScanInterval(String scanInterval) {
+            this.scanInterval = scanInterval;
+        }
+    }
+
+    public static class Timeline {
+        private boolean enabled = true;
+        private String scanInterval = "PT10S";
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getScanInterval() {
+            return scanInterval;
+        }
+
+        public void setScanInterval(String scanInterval) {
+            this.scanInterval = scanInterval;
+        }
     }
 }
