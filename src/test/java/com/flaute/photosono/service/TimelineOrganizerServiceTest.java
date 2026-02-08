@@ -117,4 +117,22 @@ class TimelineOrganizerServiceTest {
         Path conflictPath = existingFileDir.resolve("2026-02-08-10-00-00-1.jpg");
         assertTrue(Files.exists(conflictPath));
     }
+
+    @Test
+    void testOrganizeFileNoDateToUnknown() throws IOException, NoSuchAlgorithmException {
+        Path sourceFile = tempDir.resolve("unknown.jpg");
+        Files.writeString(sourceFile, "unknown content");
+
+        Path unknownDir = tempDir.resolve("unknown");
+        Files.createDirectories(unknownDir);
+
+        when(config.getUnknownDir()).thenReturn(unknownDir.toString());
+        when(dateExtractorService.extractCreationDate(sourceFile)).thenReturn(Optional.empty());
+        when(hashService.calculateSHA256(sourceFile)).thenReturn("unknownhash");
+
+        timelineOrganizerService.organizeFile(sourceFile);
+
+        Path expectedPath = unknownDir.resolve("unknownhash.jpg");
+        assertTrue(Files.exists(expectedPath));
+    }
 }

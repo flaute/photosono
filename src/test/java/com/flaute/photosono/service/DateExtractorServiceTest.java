@@ -9,21 +9,20 @@ import java.nio.file.Path;
 import java.util.Date;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class DateExtractorServiceTest {
 
     private final DateExtractorService dateExtractorService = new DateExtractorService();
 
     @Test
-    void testExtractCreationDateFallback(@TempDir Path tempDir) throws IOException {
+    void testExtractCreationDateNoMetadata(@TempDir Path tempDir) throws IOException {
         Path testFile = tempDir.resolve("test.jpg");
-        Files.writeString(testFile, "mock content");
+        Files.writeString(testFile, "mock content without metadata");
 
         Optional<Date> date = dateExtractorService.extractCreationDate(testFile);
 
-        assertTrue(date.isPresent());
-        // Should fallback to file modification time when no EXIF is present
-        assertTrue(date.get().getTime() > 0);
+        // Now that filesystem fallback is removed, this should be empty
+        assertFalse(date.isPresent());
     }
 }

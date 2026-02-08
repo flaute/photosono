@@ -10,6 +10,7 @@ public class PhotosonoConfig {
     private String inputDir;
     private String outputDir;
     private String timelineDir;
+    private String unknownDir;
     private Deduplication deduplication = new Deduplication();
     private Timeline timeline = new Timeline();
 
@@ -35,6 +36,14 @@ public class PhotosonoConfig {
 
     public void setTimelineDir(String timelineDir) {
         this.timelineDir = timelineDir;
+    }
+
+    public String getUnknownDir() {
+        return unknownDir;
+    }
+
+    public void setUnknownDir(String unknownDir) {
+        this.unknownDir = unknownDir;
     }
 
     public Deduplication getDeduplication() {

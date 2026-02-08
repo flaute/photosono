@@ -33,7 +33,7 @@ public class TimelineOrganizerService {
     public void organizeFile(Path file) {
         dateExtractorService.extractCreationDate(file).ifPresentOrElse(
                 date -> copyToTimeline(file, date),
-                () -> logger.warn("No creation date found for file: {}", file));
+                () -> copyToUnknown(file));
     }
 
     private void copyToTimeline(Path source, Date date) {
@@ -59,6 +59,30 @@ public class TimelineOrganizerService {
 
         } catch (Exception e) {
             logger.error("Error organizing file to timeline: {}", source, e);
+        }
+    }
+
+    private void copyToUnknown(Path source) {
+        try {
+            String sha256 = hashService.calculateSHA256(source);
+            String extension = getExtension(source);
+            String targetFileName = sha256 + "." + (extension.isEmpty() ? "" : extension.toLowerCase());
+
+            Path unknownDir = Paths.get(config.getUnknownDir());
+            Files.createDirectories(unknownDir);
+
+            Path targetFile = unknownDir.resolve(targetFileName);
+
+            if (Files.exists(targetFile)) {
+                logger.debug("File already exists in unknown folder: {}", targetFile);
+                return;
+            }
+
+            Files.copy(source, targetFile);
+            logger.info("No date found, moved {} to unknown: {}", source, targetFile);
+
+        } catch (Exception e) {
+            logger.error("Error copying file to unknown folder: {}", source, e);
         }
     }
 
