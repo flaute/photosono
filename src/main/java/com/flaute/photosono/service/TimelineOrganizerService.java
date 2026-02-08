@@ -9,8 +9,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class TimelineOrganizerService {
@@ -19,10 +21,13 @@ public class TimelineOrganizerService {
 
     private final PhotosonoConfig config;
     private final DateExtractorService dateExtractorService;
+    private final HashService hashService;
 
-    public TimelineOrganizerService(PhotosonoConfig config, DateExtractorService dateExtractorService) {
+    public TimelineOrganizerService(PhotosonoConfig config, DateExtractorService dateExtractorService,
+            HashService hashService) {
         this.config = config;
         this.dateExtractorService = dateExtractorService;
+        this.hashService = hashService;
     }
 
     public void organizeFile(Path file) {
@@ -43,27 +48,41 @@ public class TimelineOrganizerService {
             Path targetDir = Paths.get(config.getFinalOutputDir(), datePath);
             Files.createDirectories(targetDir);
 
-            Path targetFile = resolveTargetFile(targetDir, baseFileName, extension);
+            Optional<Path> targetFile = resolveTargetFile(source, targetDir, baseFileName, extension);
 
-            Files.copy(source, targetFile);
-            logger.info("Organized {} into timeline: {}", source, targetFile);
+            if (targetFile.isPresent()) {
+                Files.copy(source, targetFile.get());
+                logger.info("Organized {} into timeline: {}", source, targetFile.get());
+            } else {
+                logger.debug("Identical file already exists in timeline for {}, skipping.", baseFileName);
+            }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Error organizing file to timeline: {}", source, e);
         }
     }
 
-    private Path resolveTargetFile(Path targetDir, String baseName, String extension) {
+    private Optional<Path> resolveTargetFile(Path source, Path targetDir, String baseName, String extension)
+            throws IOException, NoSuchAlgorithmException {
         Path target = targetDir.resolve(baseName + "." + extension);
         if (!Files.exists(target)) {
-            return target;
+            return Optional.of(target);
+        }
+
+        // Check if existing file is identical
+        String sourceHash = hashService.calculateSHA256(source);
+        if (sourceHash.equals(hashService.calculateSHA256(target))) {
+            return Optional.empty(); // Identical file, skip
         }
 
         int counter = 1;
         while (true) {
             target = targetDir.resolve(baseName + "-" + counter + "." + extension);
             if (!Files.exists(target)) {
-                return target;
+                return Optional.of(target);
+            }
+            if (sourceHash.equals(hashService.calculateSHA256(target))) {
+                return Optional.empty(); // Identical file with counter, skip
             }
             counter++;
         }

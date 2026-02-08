@@ -10,8 +10,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,6 +20,7 @@ public class FileProcessorService {
 
     private final PhotosonoConfig config;
     private final TimelineOrganizerService organizerService;
+    private final HashService hashService;
 
     private static final Map<String, String> EXTENSION_NORMALIZATION = Map.of(
             "jpeg", "jpg",
@@ -32,9 +31,11 @@ public class FileProcessorService {
             "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm" // Videos
     );
 
-    public FileProcessorService(PhotosonoConfig config, TimelineOrganizerService organizerService) {
+    public FileProcessorService(PhotosonoConfig config, TimelineOrganizerService organizerService,
+            HashService hashService) {
         this.config = config;
         this.organizerService = organizerService;
+        this.hashService = hashService;
     }
 
     public void processFile(Path file) {
@@ -46,7 +47,7 @@ public class FileProcessorService {
             }
 
             String normalizedExtension = EXTENSION_NORMALIZATION.getOrDefault(extension, extension);
-            String sha256 = calculateSHA256(file);
+            String sha256 = hashService.calculateSHA256(file);
 
             Path outputDir = Paths.get(config.getOutputDir(), sha256.substring(0, 2));
             Files.createDirectories(outputDir);
@@ -67,26 +68,6 @@ public class FileProcessorService {
         } catch (Exception e) {
             logger.error("Error processing file: {}", file, e);
         }
-    }
-
-    private String calculateSHA256(Path file) throws IOException, NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        try (InputStream is = Files.newInputStream(file)) {
-            byte[] buffer = new byte[8192];
-            int read;
-            while ((read = is.read(buffer)) != -1) {
-                digest.update(buffer, 0, read);
-            }
-        }
-        byte[] hash = digest.digest();
-        StringBuilder hexString = new StringBuilder();
-        for (byte b : hash) {
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1)
-                hexString.append('0');
-            hexString.append(hex);
-        }
-        return hexString.toString();
     }
 
     private String getExtension(Path file) {
