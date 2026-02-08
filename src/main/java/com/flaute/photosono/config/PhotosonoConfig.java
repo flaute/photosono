@@ -9,6 +9,7 @@ public class PhotosonoConfig {
 
     private String inputDir;
     private String outputDir;
+    private String finalOutputDir;
     private String scanInterval = "PT10S"; // Default 10 seconds
 
     public String getInputDir() {
@@ -25,6 +26,14 @@ public class PhotosonoConfig {
 
     public void setOutputDir(String outputDir) {
         this.outputDir = outputDir;
+    }
+
+    public String getFinalOutputDir() {
+        return finalOutputDir;
+    }
+
+    public void setFinalOutputDir(String finalOutputDir) {
+        this.finalOutputDir = finalOutputDir;
     }
 
     public String getScanInterval() {

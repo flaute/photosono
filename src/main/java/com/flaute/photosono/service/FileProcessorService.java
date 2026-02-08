@@ -21,6 +21,7 @@ public class FileProcessorService {
     private static final Logger logger = LoggerFactory.getLogger(FileProcessorService.class);
 
     private final PhotosonoConfig config;
+    private final TimelineOrganizerService organizerService;
 
     private static final Map<String, String> EXTENSION_NORMALIZATION = Map.of(
             "jpeg", "jpg",
@@ -31,8 +32,9 @@ public class FileProcessorService {
             "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm" // Videos
     );
 
-    public FileProcessorService(PhotosonoConfig config) {
+    public FileProcessorService(PhotosonoConfig config, TimelineOrganizerService organizerService) {
         this.config = config;
+        this.organizerService = organizerService;
     }
 
     public void processFile(Path file) {
@@ -53,11 +55,14 @@ public class FileProcessorService {
 
             if (Files.exists(targetFile)) {
                 logger.debug("File already exists in output, skipping: {}", targetFile);
+                organizerService.organizeFile(targetFile); // Still try to organize if not already in timeline
                 return;
             }
 
             Files.copy(file, targetFile);
             logger.info("Copied {} to {}", file, targetFile);
+
+            organizerService.organizeFile(targetFile);
 
         } catch (Exception e) {
             logger.error("Error processing file: {}", file, e);
