@@ -49,7 +49,7 @@ public class FileProcessorService {
             String normalizedExtension = EXTENSION_NORMALIZATION.getOrDefault(extension, extension);
             String sha256 = hashService.calculateSHA256(file);
 
-            Path outputDir = Paths.get(config.getOutputDir(), sha256.substring(0, 2));
+            Path outputDir = Paths.get(config.getOutputDir(), sha256.substring(0, 1), sha256.substring(1, 2));
             Files.createDirectories(outputDir);
 
             Path targetFile = outputDir.resolve(sha256 + "." + normalizedExtension);

@@ -48,8 +48,8 @@ class FileProcessorServiceTest {
 
         fileProcessorService.processFile(inputFile);
 
-        // Expected path: output/aa/aabbccddeeff.jpg
-        Path expectedPath = outputBaseDir.resolve("aa/aabbccddeeff.jpg");
+        // Expected path: output/a/a/aabbccddeeff.jpg
+        Path expectedPath = outputBaseDir.resolve("a/a/aabbccddeeff.jpg");
         assertTrue(Files.exists(expectedPath));
 
         verify(organizerService).organizeFile(expectedPath);
