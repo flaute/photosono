@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,10 +41,11 @@ public class FileProcessorService {
     }
 
     public Result processFile(Path file) {
+        logger.info("Processing file for deduplication: {}", file);
         try {
             String extension = getExtension(file).toLowerCase();
             if (!SUPPORTED_EXTENSIONS.contains(extension)) {
-                logger.debug("Skipping unsupported file type: {}", file);
+                logger.info("Skipping unsupported file type: {}", file);
                 return Result.UNSUPPORTED;
             }
 
@@ -58,7 +58,7 @@ public class FileProcessorService {
             Path targetFile = outputDir.resolve(sha256 + "." + normalizedExtension);
 
             if (Files.exists(targetFile)) {
-                logger.debug("File already exists in output, skipping: {}", targetFile);
+                logger.info("File already exists in output, skipping: {}", targetFile);
                 return Result.SKIPPED;
             }
 

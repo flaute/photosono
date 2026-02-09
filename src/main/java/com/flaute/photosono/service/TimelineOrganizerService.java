@@ -38,6 +38,7 @@ public class TimelineOrganizerService {
     }
 
     public Result organizeFile(Path file) {
+        logger.info("Processing file for timeline organization: {}", file);
         return dateExtractorService.extractCreationDate(file)
                 .map(date -> linkToTimeline(file, date))
                 .orElseGet(() -> linkToUnknown(file));
@@ -62,7 +63,7 @@ public class TimelineOrganizerService {
                 logger.info("Linked {} into timeline: {}", source, targetFile.get());
                 return Result.TIMELINE;
             } else {
-                logger.debug("Identical file already exists in timeline for {}, skipping.", baseFileName);
+                logger.info("Identical file already exists in timeline for {}, skipping.", baseFileName);
                 return Result.SKIPPED;
             }
 
