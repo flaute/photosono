@@ -23,6 +23,13 @@ public class TimelineOrganizerService {
     private final DateExtractorService dateExtractorService;
     private final HashService hashService;
 
+    public enum Result {
+        TIMELINE,
+        UNKNOWN,
+        SKIPPED,
+        ERROR
+    }
+
     public TimelineOrganizerService(PhotosonoConfig config, DateExtractorService dateExtractorService,
             HashService hashService) {
         this.config = config;
@@ -30,13 +37,13 @@ public class TimelineOrganizerService {
         this.hashService = hashService;
     }
 
-    public void organizeFile(Path file) {
-        dateExtractorService.extractCreationDate(file).ifPresentOrElse(
-                date -> linkToTimeline(file, date),
-                () -> linkToUnknown(file));
+    public Result organizeFile(Path file) {
+        return dateExtractorService.extractCreationDate(file)
+                .map(date -> linkToTimeline(file, date))
+                .orElseGet(() -> linkToUnknown(file));
     }
 
-    private void linkToTimeline(Path source, Date date) {
+    private Result linkToTimeline(Path source, Date date) {
         try {
             SimpleDateFormat dirFormatter = new SimpleDateFormat("yyyy/MM/dd");
             SimpleDateFormat fileFormatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
@@ -53,16 +60,19 @@ public class TimelineOrganizerService {
             if (targetFile.isPresent()) {
                 createRelativeSymlink(source, targetFile.get());
                 logger.info("Linked {} into timeline: {}", source, targetFile.get());
+                return Result.TIMELINE;
             } else {
                 logger.debug("Identical file already exists in timeline for {}, skipping.", baseFileName);
+                return Result.SKIPPED;
             }
 
         } catch (Exception e) {
             logger.error("Error linking file to timeline: {}", source, e);
+            return Result.ERROR;
         }
     }
 
-    private void linkToUnknown(Path source) {
+    private Result linkToUnknown(Path source) {
         try {
             String sha256 = hashService.calculateSHA256(source);
             String extension = getExtension(source);
@@ -75,18 +85,22 @@ public class TimelineOrganizerService {
 
             if (Files.exists(targetFile)) {
                 logger.debug("Link already exists in unknown folder: {}", targetFile);
-                return;
+                return Result.SKIPPED;
             }
 
             createRelativeSymlink(source, targetFile);
             logger.info("No date found, linked {} to unknown: {}", source, targetFile);
+            return Result.UNKNOWN;
 
         } catch (Exception e) {
             logger.error("Error linking file to unknown folder: {}", source, e);
+            return Result.ERROR;
         }
     }
 
     private void createRelativeSymlink(Path source, Path target) throws IOException {
+        // Ensure parent directories exist (redundant but safe)
+        Files.createDirectories(target.getParent());
         Path relativeSource = target.getParent().relativize(source);
         Files.createSymbolicLink(target, relativeSource);
     }

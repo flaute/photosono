@@ -45,6 +45,7 @@ class FileScannerServiceTest {
         Files.writeString(file2, "content2");
 
         when(config.getInputDir()).thenReturn(inputDir.toString());
+        when(processorService.processFile(any())).thenReturn(FileProcessorService.Result.PROCESSED);
 
         fileScannerService.scanInputDirectory();
 

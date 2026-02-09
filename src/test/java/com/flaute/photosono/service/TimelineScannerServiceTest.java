@@ -45,6 +45,7 @@ class TimelineScannerServiceTest {
         Files.writeString(file1, "content");
 
         when(config.getOutputDir()).thenReturn(outputDir.toString());
+        when(organizerService.organizeFile(any())).thenReturn(TimelineOrganizerService.Result.TIMELINE);
 
         timelineScannerService.scanOutputDirectory();
 

@@ -20,6 +20,13 @@ public class FileProcessorService {
     private final PhotosonoConfig config;
     private final HashService hashService;
 
+    public enum Result {
+        PROCESSED,
+        SKIPPED,
+        UNSUPPORTED,
+        ERROR
+    }
+
     private static final Map<String, String> EXTENSION_NORMALIZATION = Map.of(
             "jpeg", "jpg",
             "jpg", "jpg");
@@ -34,12 +41,12 @@ public class FileProcessorService {
         this.hashService = hashService;
     }
 
-    public void processFile(Path file) {
+    public Result processFile(Path file) {
         try {
             String extension = getExtension(file).toLowerCase();
             if (!SUPPORTED_EXTENSIONS.contains(extension)) {
                 logger.debug("Skipping unsupported file type: {}", file);
-                return;
+                return Result.UNSUPPORTED;
             }
 
             String normalizedExtension = EXTENSION_NORMALIZATION.getOrDefault(extension, extension);
@@ -52,14 +59,16 @@ public class FileProcessorService {
 
             if (Files.exists(targetFile)) {
                 logger.debug("File already exists in output, skipping: {}", targetFile);
-                return;
+                return Result.SKIPPED;
             }
 
             Files.copy(file, targetFile);
             logger.info("Copied {} to {}", file, targetFile);
+            return Result.PROCESSED;
 
         } catch (Exception e) {
             logger.error("Error processing file: {}", file, e);
+            return Result.ERROR;
         }
     }
 
