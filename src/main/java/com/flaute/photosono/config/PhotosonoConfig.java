@@ -64,7 +64,6 @@ public class PhotosonoConfig {
 
     public static class Deduplication {
         private boolean enabled = true;
-        private String scanInterval = "PT10S";
 
         public boolean isEnabled() {
             return enabled;
@@ -72,20 +71,11 @@ public class PhotosonoConfig {
 
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
-        }
-
-        public String getScanInterval() {
-            return scanInterval;
-        }
-
-        public void setScanInterval(String scanInterval) {
-            this.scanInterval = scanInterval;
         }
     }
 
     public static class Timeline {
         private boolean enabled = true;
-        private String scanInterval = "PT10S";
 
         public boolean isEnabled() {
             return enabled;
@@ -93,14 +83,6 @@ public class PhotosonoConfig {
 
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
-        }
-
-        public String getScanInterval() {
-            return scanInterval;
-        }
-
-        public void setScanInterval(String scanInterval) {
-            this.scanInterval = scanInterval;
         }
     }
 }

@@ -15,7 +15,5 @@ services:
       - PHOTOSONO_TIMELINE_DIR=/timeline
       - PHOTOSONO_UNKNOWN_DIR=/unknown
       - PHOTOSONO_DEDUPLICATION_ENABLED=true
-      - PHOTOSONO_DEDUPLICATION_SCAN_INTERVAL=PT30S
       - PHOTOSONO_TIMELINE_ENABLED=true
-      - PHOTOSONO_TIMELINE_SCAN_INTERVAL=PT1M
-    restart: unless-stopped
+    restart: "no" # One-shot execution, don't restart automatically

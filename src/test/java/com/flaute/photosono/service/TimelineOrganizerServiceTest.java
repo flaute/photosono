@@ -40,7 +40,9 @@ class TimelineOrganizerServiceTest {
 
     @Test
     void testOrganizeFile() throws IOException, NoSuchAlgorithmException {
-        Path sourceFile = tempDir.resolve("input.jpg");
+        // Output file (source for timeline)
+        Path sourceFile = tempDir.resolve("output/a/b/hash123.jpg");
+        Files.createDirectories(sourceFile.getParent());
         Files.writeString(sourceFile, "content");
 
         Path timelineDir = tempDir.resolve("timeline");
@@ -57,19 +59,24 @@ class TimelineOrganizerServiceTest {
 
         timelineOrganizerService.organizeFile(sourceFile);
 
-        Path expectedPath = timelineDir.resolve("2026/02/08/2026-02-08-10-00-00.jpg");
-        assertTrue(Files.exists(expectedPath));
+        Path expectedPath = timelineDir.resolve("2026/02/08/20260208-100000.jpg");
+        assertTrue(Files.exists(expectedPath), "Symlink should exist");
+        assertTrue(Files.isSymbolicLink(expectedPath), "File should be a symbolic link");
+
+        Path target = Files.readSymbolicLink(expectedPath);
+        assertTrue(!target.isAbsolute(), "Symlink should be relative");
     }
 
     @Test
     void testOrganizeFileWithConflictDuplicateHash() throws IOException, NoSuchAlgorithmException {
-        Path sourceFile = tempDir.resolve("input.jpg");
+        Path sourceFile = tempDir.resolve("output/a/b/hash123.jpg");
+        Files.createDirectories(sourceFile.getParent());
         Files.writeString(sourceFile, "content");
 
         Path timelineDir = tempDir.resolve("timeline");
         Path existingFileDir = timelineDir.resolve("2026/02/08");
         Files.createDirectories(existingFileDir);
-        Path existingFile = existingFileDir.resolve("2026-02-08-10-00-00.jpg");
+        Path existingFile = existingFileDir.resolve("20260208-100000.jpg");
         Files.writeString(existingFile, "content"); // Same content -> same hash
 
         when(config.getTimelineDir()).thenReturn(timelineDir.toString());
@@ -83,20 +90,21 @@ class TimelineOrganizerServiceTest {
 
         timelineOrganizerService.organizeFile(sourceFile);
 
-        // Verification: The second copy should be skipped, so no -1 file should exist
-        Path conflictPath = existingFileDir.resolve("2026-02-08-10-00-00-1.jpg");
+        // Verification: The second link should be skipped
+        Path conflictPath = existingFileDir.resolve("20260208-100000-1.jpg");
         assertTrue(!Files.exists(conflictPath));
     }
 
     @Test
     void testOrganizeFileWithConflictDifferentHash() throws IOException, NoSuchAlgorithmException {
-        Path sourceFile = tempDir.resolve("input.jpg");
+        Path sourceFile = tempDir.resolve("output/a/b/hash_new.jpg");
+        Files.createDirectories(sourceFile.getParent());
         Files.writeString(sourceFile, "content2");
 
         Path timelineDir = tempDir.resolve("timeline");
         Path existingFileDir = timelineDir.resolve("2026/02/08");
         Files.createDirectories(existingFileDir);
-        Path existingFile = existingFileDir.resolve("2026-02-08-10-00-00.jpg");
+        Path existingFile = existingFileDir.resolve("20260208-100000.jpg");
         Files.writeString(existingFile, "content1"); // Different content -> different hash
 
         when(config.getTimelineDir()).thenReturn(timelineDir.toString());
@@ -107,20 +115,22 @@ class TimelineOrganizerServiceTest {
 
         when(dateExtractorService.extractCreationDate(sourceFile)).thenReturn(Optional.of(testDate));
 
-        // Return different hashes for source and existing file
+        // Return different hashes
         when(hashService.calculateSHA256(sourceFile)).thenReturn("hash_new");
         when(hashService.calculateSHA256(existingFile)).thenReturn("hash_old");
 
         timelineOrganizerService.organizeFile(sourceFile);
 
-        // Verification: The second copy should be created with -1
-        Path conflictPath = existingFileDir.resolve("2026-02-08-10-00-00-1.jpg");
+        // Verification: The second link should be created with -1
+        Path conflictPath = existingFileDir.resolve("20260208-100000-1.jpg");
         assertTrue(Files.exists(conflictPath));
+        assertTrue(Files.isSymbolicLink(conflictPath));
     }
 
     @Test
     void testOrganizeFileNoDateToUnknown() throws IOException, NoSuchAlgorithmException {
-        Path sourceFile = tempDir.resolve("unknown.jpg");
+        Path sourceFile = tempDir.resolve("output/a/b/unknownhash.jpg");
+        Files.createDirectories(sourceFile.getParent());
         Files.writeString(sourceFile, "unknown content");
 
         Path unknownDir = tempDir.resolve("unknown");
@@ -134,5 +144,6 @@ class TimelineOrganizerServiceTest {
 
         Path expectedPath = unknownDir.resolve("unknownhash.jpg");
         assertTrue(Files.exists(expectedPath));
+        assertTrue(Files.isSymbolicLink(expectedPath));
     }
 }

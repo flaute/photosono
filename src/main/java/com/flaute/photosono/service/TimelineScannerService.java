@@ -25,7 +25,6 @@ public class TimelineScannerService {
         this.organizerService = organizerService;
     }
 
-    @Scheduled(fixedDelayString = "${photosono.timeline.scan-interval:PT10S}")
     public void scanOutputDirectory() {
         if (!config.getTimeline().isEnabled()) {
             return;

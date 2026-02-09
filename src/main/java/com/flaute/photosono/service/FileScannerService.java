@@ -25,7 +25,6 @@ public class FileScannerService {
         this.processorService = processorService;
     }
 
-    @Scheduled(fixedDelayString = "${photosono.deduplication.scan-interval:PT10S}")
     public void scanInputDirectory() {
         if (!config.getDeduplication().isEnabled()) {
             return;
