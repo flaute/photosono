@@ -7,6 +7,7 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.mov.QuickTimeDirectory;
 import com.drew.metadata.mp4.Mp4Directory;
+import com.drew.metadata.avi.AviDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,12 @@ public class DateExtractorService {
                     QuickTimeDirectory.TAG_CREATION_TIME);
             if (movDate.isPresent())
                 return movDate;
+
+            // 6: Video Creation Date (AVI)
+            Optional<Date> aviDate = getDateFromDirectory(metadata, AviDirectory.class,
+                    AviDirectory.TAG_DATETIME_ORIGINAL);
+            if (aviDate.isPresent())
+                return aviDate;
 
         } catch (Exception e) {
             logger.warn("Could not extract metadata from {}: {}", path, e.getMessage());

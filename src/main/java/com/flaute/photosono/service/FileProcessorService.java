@@ -32,7 +32,7 @@ public class FileProcessorService {
 
     private static final Set<String> SUPPORTED_EXTENSIONS = Set.of(
             "jpg", "jpeg", "png", "gif", "bmp", "webp", "heic", "heif", // Photos
-            "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm" // Videos
+            "mp4", "mov", "avi" // Videos
     );
 
     public FileProcessorService(PhotosonoConfig config, HashService hashService) {
