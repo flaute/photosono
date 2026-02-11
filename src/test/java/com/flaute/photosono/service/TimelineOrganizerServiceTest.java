@@ -40,8 +40,8 @@ class TimelineOrganizerServiceTest {
 
     @Test
     void testOrganizeFile() throws IOException, NoSuchAlgorithmException {
-        // Output file (source for timeline)
-        Path sourceFile = tempDir.resolve("output/a/b/hash123.jpg");
+        // Originals file (source for timeline)
+        Path sourceFile = tempDir.resolve("originals/a/b/hash123.jpg");
         Files.createDirectories(sourceFile.getParent());
         Files.writeString(sourceFile, "content");
 
@@ -69,7 +69,7 @@ class TimelineOrganizerServiceTest {
 
     @Test
     void testOrganizeFileWithConflictDuplicateHash() throws IOException, NoSuchAlgorithmException {
-        Path sourceFile = tempDir.resolve("output/a/b/hash123.jpg");
+        Path sourceFile = tempDir.resolve("originals/a/b/hash123.jpg");
         Files.createDirectories(sourceFile.getParent());
         Files.writeString(sourceFile, "content");
 
@@ -97,7 +97,7 @@ class TimelineOrganizerServiceTest {
 
     @Test
     void testOrganizeFileWithConflictDifferentHash() throws IOException, NoSuchAlgorithmException {
-        Path sourceFile = tempDir.resolve("output/a/b/hash_new.jpg");
+        Path sourceFile = tempDir.resolve("originals/a/b/hash_new.jpg");
         Files.createDirectories(sourceFile.getParent());
         Files.writeString(sourceFile, "content2");
 
@@ -128,22 +128,23 @@ class TimelineOrganizerServiceTest {
     }
 
     @Test
-    void testOrganizeFileNoDateToUnknown() throws IOException, NoSuchAlgorithmException {
-        Path sourceFile = tempDir.resolve("output/a/b/unknownhash.jpg");
+    void testOrganizeFileNoDateToUnknownDate() throws IOException, NoSuchAlgorithmException {
+        Path sourceFile = tempDir.resolve("originals/a/b/unknownhash.jpg");
         Files.createDirectories(sourceFile.getParent());
         Files.writeString(sourceFile, "unknown content");
 
-        Path unknownDir = tempDir.resolve("unknown");
-        Files.createDirectories(unknownDir);
+        Path unknownDateDir = tempDir.resolve("unknown-date");
+        Files.createDirectories(unknownDateDir);
 
-        when(config.getUnknownDir()).thenReturn(unknownDir.toString());
+        when(config.getUnknownDateDir()).thenReturn(unknownDateDir.toString());
         when(dateExtractorService.extractCreationDate(sourceFile)).thenReturn(Optional.empty());
         when(hashService.calculateSHA256(sourceFile)).thenReturn("unknownhash");
 
         timelineOrganizerService.organizeFile(sourceFile);
 
-        Path expectedPath = unknownDir.resolve("unknownhash.jpg");
-        assertTrue(Files.exists(expectedPath));
-        assertTrue(Files.isSymbolicLink(expectedPath));
+        // Nested structure: /unknown-date/u/n/unknownhash.jpg
+        Path expectedPath = unknownDateDir.resolve("u/n/unknownhash.jpg");
+        assertTrue(Files.exists(expectedPath), "Symlink should exist in nested structure under unknown-date");
+        assertTrue(Files.isSymbolicLink(expectedPath), "File should be a symbolic link");
     }
 }

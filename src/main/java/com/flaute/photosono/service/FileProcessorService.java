@@ -22,7 +22,7 @@ public class FileProcessorService {
     public enum Result {
         PROCESSED,
         SKIPPED,
-        UNSUPPORTED,
+        UNKNOWN_TYPE,
         ERROR
     }
 
@@ -44,21 +44,20 @@ public class FileProcessorService {
         logger.info("Processing file for deduplication: {}", file);
         try {
             String extension = getExtension(file).toLowerCase();
-            if (!SUPPORTED_EXTENSIONS.contains(extension)) {
-                logger.info("Skipping unsupported file type: {}", file);
-                return Result.UNSUPPORTED;
-            }
-
             String normalizedExtension = EXTENSION_NORMALIZATION.getOrDefault(extension, extension);
             String sha256 = hashService.calculateSHA256(file);
 
-            Path outputDir = Paths.get(config.getOutputDir(), sha256.substring(0, 1), sha256.substring(1, 2));
-            Files.createDirectories(outputDir);
+            if (!SUPPORTED_EXTENSIONS.contains(extension)) {
+                return copyToUnknownType(file, sha256, extension);
+            }
 
-            Path targetFile = outputDir.resolve(sha256 + "." + normalizedExtension);
+            Path originalsDir = Paths.get(config.getOriginalsDir(), sha256.substring(0, 1), sha256.substring(1, 2));
+            Files.createDirectories(originalsDir);
+
+            Path targetFile = originalsDir.resolve(sha256 + "." + normalizedExtension);
 
             if (Files.exists(targetFile)) {
-                logger.info("File already exists in output, skipping: {}", targetFile);
+                logger.info("File already exists in originals, skipping: {}", targetFile);
                 return Result.SKIPPED;
             }
 
@@ -70,6 +69,23 @@ public class FileProcessorService {
             logger.error("Error processing file: {}", file, e);
             return Result.ERROR;
         }
+    }
+
+    private Result copyToUnknownType(Path source, String sha256, String extension) throws Exception {
+        Path unknownTypeDir = Paths.get(config.getUnknownTypeDir(), sha256.substring(0, 1), sha256.substring(1, 2));
+        Files.createDirectories(unknownTypeDir);
+
+        String fileName = sha256 + (extension.isEmpty() ? "" : "." + extension);
+        Path targetFile = unknownTypeDir.resolve(fileName);
+
+        if (Files.exists(targetFile)) {
+            logger.info("Unknown type file already exists, skipping: {}", targetFile);
+            return Result.SKIPPED;
+        }
+
+        Files.copy(source, targetFile);
+        logger.info("Copied unknown type file {} to {}", source, targetFile);
+        return Result.UNKNOWN_TYPE;
     }
 
     private String getExtension(Path file) {

@@ -8,9 +8,10 @@ import org.springframework.context.annotation.Configuration;
 public class PhotosonoConfig {
 
     private String inputDir;
-    private String outputDir;
+    private String originalsDir;
     private String timelineDir;
-    private String unknownDir;
+    private String unknownDateDir;
+    private String unknownTypeDir;
     private Deduplication deduplication = new Deduplication();
     private Timeline timeline = new Timeline();
 
@@ -22,12 +23,12 @@ public class PhotosonoConfig {
         this.inputDir = inputDir;
     }
 
-    public String getOutputDir() {
-        return outputDir;
+    public String getOriginalsDir() {
+        return originalsDir;
     }
 
-    public void setOutputDir(String outputDir) {
-        this.outputDir = outputDir;
+    public void setOriginalsDir(String originalsDir) {
+        this.originalsDir = originalsDir;
     }
 
     public String getTimelineDir() {
@@ -38,12 +39,20 @@ public class PhotosonoConfig {
         this.timelineDir = timelineDir;
     }
 
-    public String getUnknownDir() {
-        return unknownDir;
+    public String getUnknownDateDir() {
+        return unknownDateDir;
     }
 
-    public void setUnknownDir(String unknownDir) {
-        this.unknownDir = unknownDir;
+    public void setUnknownDateDir(String unknownDateDir) {
+        this.unknownDateDir = unknownDateDir;
+    }
+
+    public String getUnknownTypeDir() {
+        return unknownTypeDir;
+    }
+
+    public void setUnknownTypeDir(String unknownTypeDir) {
+        this.unknownTypeDir = unknownTypeDir;
     }
 
     public Deduplication getDeduplication() {

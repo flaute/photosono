@@ -36,18 +36,18 @@ class TimelineScannerServiceTest {
     }
 
     @Test
-    void testScanOutputDirectory() throws IOException {
-        Path outputDir = tempDir.resolve("output");
-        Files.createDirectories(outputDir);
-        Path subDir = outputDir.resolve("a/b");
+    void testScanOriginalsDirectory() throws IOException {
+        Path originalsDir = tempDir.resolve("originals");
+        Files.createDirectories(originalsDir);
+        Path subDir = originalsDir.resolve("a/b");
         Files.createDirectories(subDir);
         Path file1 = subDir.resolve("hash.jpg");
         Files.writeString(file1, "content");
 
-        when(config.getOutputDir()).thenReturn(outputDir.toString());
+        when(config.getOriginalsDir()).thenReturn(originalsDir.toString());
         when(organizerService.organizeFile(any())).thenReturn(TimelineOrganizerService.Result.TIMELINE);
 
-        timelineScannerService.scanOutputDirectory();
+        timelineScannerService.scanOriginalsDirectory();
 
         verify(organizerService).organizeFile(file1);
     }
@@ -56,7 +56,7 @@ class TimelineScannerServiceTest {
     void testScanDisabled() throws IOException {
         when(timeline.isEnabled()).thenReturn(false);
 
-        timelineScannerService.scanOutputDirectory();
+        timelineScannerService.scanOriginalsDirectory();
 
         verifyNoInteractions(organizerService);
     }

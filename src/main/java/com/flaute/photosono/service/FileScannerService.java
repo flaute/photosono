@@ -41,7 +41,7 @@ public class FileScannerService {
         AtomicInteger total = new AtomicInteger(0);
         AtomicInteger processed = new AtomicInteger(0);
         AtomicInteger skipped = new AtomicInteger(0);
-        AtomicInteger unsupported = new AtomicInteger(0);
+        AtomicInteger unknownType = new AtomicInteger(0);
         AtomicInteger errors = new AtomicInteger(0);
 
         try (Stream<Path> paths = Files.walk(inputPath)) {
@@ -52,7 +52,7 @@ public class FileScannerService {
                         switch (result) {
                             case PROCESSED -> processed.incrementAndGet();
                             case SKIPPED -> skipped.incrementAndGet();
-                            case UNSUPPORTED -> unsupported.incrementAndGet();
+                            case UNKNOWN_TYPE -> unknownType.incrementAndGet();
                             case ERROR -> errors.incrementAndGet();
                         }
                     });
@@ -64,7 +64,7 @@ public class FileScannerService {
         logger.info("Total files found:   {}", total.get());
         logger.info("Unique files copied: {}", processed.get());
         logger.info("Duplicates skipped:  {}", skipped.get());
-        logger.info("Unsupported types:  {}", unsupported.get());
+        logger.info("Unknown type:        {}", unknownType.get());
         if (errors.get() > 0) {
             logger.error("Errors encountered:  {}", errors.get());
         }

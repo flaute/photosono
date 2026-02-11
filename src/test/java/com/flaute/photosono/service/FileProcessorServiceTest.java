@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
@@ -38,28 +39,36 @@ class FileProcessorServiceTest {
         Path inputFile = tempDir.resolve("test.JPG"); // Test extension normalization
         Files.writeString(inputFile, "content");
 
-        Path outputBaseDir = tempDir.resolve("output");
-        Files.createDirectories(outputBaseDir);
+        Path originalsBaseDir = tempDir.resolve("originals");
+        Files.createDirectories(originalsBaseDir);
 
-        when(config.getOutputDir()).thenReturn(outputBaseDir.toString());
+        when(config.getOriginalsDir()).thenReturn(originalsBaseDir.toString());
         when(hashService.calculateSHA256(inputFile)).thenReturn("aabbccddeeff");
 
         fileProcessorService.processFile(inputFile);
 
-        // Expected path: output/a/a/aabbccddeeff.jpg
-        Path expectedPath = outputBaseDir.resolve("a/a/aabbccddeeff.jpg");
+        // Expected path: originals/a/a/aabbccddeeff.jpg
+        Path expectedPath = originalsBaseDir.resolve("a/a/aabbccddeeff.jpg");
         assertTrue(Files.exists(expectedPath));
     }
 
     @Test
-    void testProcessUnsupportedFile() throws IOException {
+    void testProcessUnknownTypeFile() throws IOException, NoSuchAlgorithmException {
         Path inputFile = tempDir.resolve("test.txt");
         Files.writeString(inputFile, "content");
 
-        fileProcessorService.processFile(inputFile);
+        Path unknownTypeDir = tempDir.resolve("unknown-type");
+        Files.createDirectories(unknownTypeDir);
 
-        // Should not create any output
-        Path outputBaseDir = tempDir.resolve("output");
-        assertTrue(!Files.exists(outputBaseDir));
+        when(config.getUnknownTypeDir()).thenReturn(unknownTypeDir.toString());
+        when(hashService.calculateSHA256(inputFile)).thenReturn("aabbccddeeff");
+
+        FileProcessorService.Result result = fileProcessorService.processFile(inputFile);
+
+        assertEquals(FileProcessorService.Result.UNKNOWN_TYPE, result);
+        // Expected path: unknown-type/a/a/aabbccddeeff.txt
+        Path expectedPath = unknownTypeDir.resolve("a/a/aabbccddeeff.txt");
+        assertTrue(Files.exists(expectedPath), "Unknown type file should be copied to unknown-type directory");
+        assertEquals("content", Files.readString(expectedPath));
     }
 }

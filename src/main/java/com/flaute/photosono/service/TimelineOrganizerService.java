@@ -25,7 +25,7 @@ public class TimelineOrganizerService {
 
     public enum Result {
         TIMELINE,
-        UNKNOWN,
+        UNKNOWN_DATE,
         SKIPPED,
         ERROR
     }
@@ -41,7 +41,7 @@ public class TimelineOrganizerService {
         logger.info("Processing file for timeline organization: {}", file);
         return dateExtractorService.extractCreationDate(file)
                 .map(date -> linkToTimeline(file, date))
-                .orElseGet(() -> linkToUnknown(file));
+                .orElseGet(() -> linkToUnknownDate(file));
     }
 
     private Result linkToTimeline(Path source, Date date) {
@@ -73,28 +73,30 @@ public class TimelineOrganizerService {
         }
     }
 
-    private Result linkToUnknown(Path source) {
+    private Result linkToUnknownDate(Path source) {
         try {
             String sha256 = hashService.calculateSHA256(source);
             String extension = getExtension(source);
             String targetFileName = sha256 + "." + (extension.isEmpty() ? "" : extension.toLowerCase());
 
-            Path unknownDir = Paths.get(config.getUnknownDir());
+            // Use structured directory for unknown files:
+            // /unknown-date/{h0}/{h1}/{hash}.ext
+            Path unknownDir = Paths.get(config.getUnknownDateDir(), sha256.substring(0, 1), sha256.substring(1, 2));
             Files.createDirectories(unknownDir);
 
             Path targetFile = unknownDir.resolve(targetFileName);
 
             if (Files.exists(targetFile)) {
-                logger.debug("Link already exists in unknown folder: {}", targetFile);
+                logger.info("Link already exists in unknown-date folder: {}", targetFile);
                 return Result.SKIPPED;
             }
 
             createRelativeSymlink(source, targetFile);
-            logger.info("No date found, linked {} to unknown: {}", source, targetFile);
-            return Result.UNKNOWN;
+            logger.info("No date found, linked {} to unknown-date: {}", source, targetFile);
+            return Result.UNKNOWN_DATE;
 
         } catch (Exception e) {
-            logger.error("Error linking file to unknown folder: {}", source, e);
+            logger.error("Error linking file to unknown-date folder: {}", source, e);
             return Result.ERROR;
         }
     }

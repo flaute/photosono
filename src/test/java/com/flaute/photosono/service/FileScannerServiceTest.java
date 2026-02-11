@@ -54,6 +54,21 @@ class FileScannerServiceTest {
     }
 
     @Test
+    void testScanInputDirectoryWithUnknownType() throws IOException {
+        Path inputDir = tempDir.resolve("input");
+        Files.createDirectories(inputDir);
+        Path file1 = inputDir.resolve("test.txt");
+        Files.writeString(file1, "content");
+
+        when(config.getInputDir()).thenReturn(inputDir.toString());
+        when(processorService.processFile(file1)).thenReturn(FileProcessorService.Result.UNKNOWN_TYPE);
+
+        fileScannerService.scanInputDirectory();
+
+        verify(processorService).processFile(file1);
+    }
+
+    @Test
     void testScanDisabled() throws IOException {
         when(deduplication.isEnabled()).thenReturn(false);
 

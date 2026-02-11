@@ -25,45 +25,45 @@ public class TimelineScannerService {
         this.organizerService = organizerService;
     }
 
-    public void scanOutputDirectory() {
+    public void scanOriginalsDirectory() {
         if (!config.getTimeline().isEnabled()) {
             return;
         }
 
-        logger.info("Scanning unique output directory for timeline organization: {}", config.getOutputDir());
-        Path outputPath = Paths.get(config.getOutputDir());
+        logger.info("Scanning unique originals directory for timeline organization: {}", config.getOriginalsDir());
+        Path originalsPath = Paths.get(config.getOriginalsDir());
 
-        if (!Files.exists(outputPath)) {
-            logger.warn("Output directory does not exist: {}", outputPath);
+        if (!Files.exists(originalsPath)) {
+            logger.warn("Originals directory does not exist: {}", originalsPath);
             return;
         }
 
         AtomicInteger total = new AtomicInteger(0);
         AtomicInteger timeline = new AtomicInteger(0);
-        AtomicInteger unknown = new AtomicInteger(0);
+        AtomicInteger unknownDate = new AtomicInteger(0);
         AtomicInteger skipped = new AtomicInteger(0);
         AtomicInteger errors = new AtomicInteger(0);
 
-        try (Stream<Path> paths = Files.walk(outputPath)) {
+        try (Stream<Path> paths = Files.walk(originalsPath)) {
             paths.filter(Files::isRegularFile)
                     .forEach(file -> {
                         total.incrementAndGet();
                         TimelineOrganizerService.Result result = organizerService.organizeFile(file);
                         switch (result) {
                             case TIMELINE -> timeline.incrementAndGet();
-                            case UNKNOWN -> unknown.incrementAndGet();
+                            case UNKNOWN_DATE -> unknownDate.incrementAndGet();
                             case SKIPPED -> skipped.incrementAndGet();
                             case ERROR -> errors.incrementAndGet();
                         }
                     });
         } catch (IOException e) {
-            logger.error("Error scanning output directory: {}", outputPath, e);
+            logger.error("Error scanning originals directory: {}", originalsPath, e);
         }
 
         logger.info("--- Timeline Summary ---");
         logger.info("Total files found:     {}", total.get());
         logger.info("Links to Timeline:     {}", timeline.get());
-        logger.info("Links to Unknown:      {}", unknown.get());
+        logger.info("Links to Unknown Date: {}", unknownDate.get());
         logger.info("Existing links skipped: {}", skipped.get());
         if (errors.get() > 0) {
             logger.error("Errors encountered:    {}", errors.get());

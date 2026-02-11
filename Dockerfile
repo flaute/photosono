@@ -2,7 +2,6 @@
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY pom.xml .
-RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn clean package -DskipTests
 
@@ -11,15 +10,17 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/target/photosono-*.jar app.jar
 
-# Map internal paths to environment variables
 ENV PHOTOSONO_INPUT_DIR=/input
-ENV PHOTOSONO_OUTPUT_DIR=/output
+ENV PHOTOSONO_ORIGINALS_DIR=/originals
 ENV PHOTOSONO_TIMELINE_DIR=/timeline
-ENV PHOTOSONO_UNKNOWN_DIR=/unknown
+ENV PHOTOSONO_UNKNOWN_DATE_DIR=/unknown-date
+ENV PHOTOSONO_UNKNOWN_TYPE_DIR=/unknown-type
 ENV PHOTOSONO_DEDUPLICATION_ENABLED=true
 ENV PHOTOSONO_TIMELINE_ENABLED=true
 
-# Create directories and set permissions
-RUN mkdir -p /input /output /timeline /unknown
+# Create directories
+RUN mkdir -p /input /originals /timeline /unknown-date /unknown-type
+
+VOLUME ["/input", "/originals", "/timeline", "/unknown-date", "/unknown-type"]
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

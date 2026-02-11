@@ -1,19 +1,16 @@
-version: '3.8'
-
 services:
   photosono:
     build: .
-    container_name: photosono
+    restart: "no"
     volumes:
-      - /Users/christian/photosono-pics/input:/input
-      - /Users/christian/photosono-pics/output:/output
-      - /Users/christian/photosono-pics/timeline:/timeline
-      - /Users/christian/photosono-pics/unknown:/unknown
+      - ./input:/input
+      - ./originals:/originals
+      - ./timeline:/timeline
+      - ./unknown-date:/unknown-date
+      - ./unknown-type:/unknown-type
     environment:
       - PHOTOSONO_INPUT_DIR=/input
-      - PHOTOSONO_OUTPUT_DIR=/output
+      - PHOTOSONO_ORIGINALS_DIR=/originals
       - PHOTOSONO_TIMELINE_DIR=/timeline
-      - PHOTOSONO_UNKNOWN_DIR=/unknown
-      - PHOTOSONO_DEDUPLICATION_ENABLED=true
-      - PHOTOSONO_TIMELINE_ENABLED=true
-    restart: "no" # One-shot execution, don't restart automatically
+      - PHOTOSONO_UNKNOWN_DATE_DIR=/unknown-date
+      - PHOTOSONO_UNKNOWN_TYPE_DIR=/unknown-type

@@ -30,11 +30,11 @@ public class PhotosonoRunner implements CommandLineRunner {
         try {
             logger.info("Starting sequential execution...");
 
-            logger.info("Executing Phase 1: Deduplication (Input -> Output)");
+            logger.info("Executing Phase 1: Deduplication (Input -> Originals)");
             fileScannerService.scanInputDirectory();
 
-            logger.info("Executing Phase 2: Timeline Organization (Output -> Timeline)");
-            timelineScannerService.scanOutputDirectory();
+            logger.info("Executing Phase 2: Timeline Organization (Originals -> Timeline)");
+            timelineScannerService.scanOriginalsDirectory();
 
             logger.info("Processing complete. Application will now exit.");
 
