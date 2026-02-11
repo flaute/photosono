@@ -3,11 +3,11 @@ services:
     build: .
     restart: "no"
     volumes:
-      - ./input:/input
-      - ./originals:/originals
-      - ./timeline:/timeline
-      - ./unknown-date:/unknown-date
-      - ./unknown-type:/unknown-type
+      - /mnt/usbhdd4/data/pics/new:/input
+      - /mnt/usbhdd3/data/originals:/originals
+      - /mnt/usbhdd3/data/timeline:/timeline
+      - /mnt/usbhdd3/data/unknown-date:/unknown-date
+      - /mnt/usbhdd3/data/unknown-type:/unknown-type
     environment:
       - PHOTOSONO_INPUT_DIR=/input
       - PHOTOSONO_ORIGINALS_DIR=/originals
