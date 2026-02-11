@@ -71,4 +71,31 @@ class FileProcessorServiceTest {
         assertTrue(Files.exists(expectedPath), "Unknown type file should be copied to unknown-type directory");
         assertEquals("content", Files.readString(expectedPath));
     }
+
+    @Test
+    void testProcessUnknownTypeFileWithCollision() throws IOException, NoSuchAlgorithmException {
+        Path inputFile1 = tempDir.resolve("test1.txt");
+        Files.writeString(inputFile1, "content1");
+        Path inputFile2 = tempDir.resolve("test2.txt");
+        Files.writeString(inputFile2, "content2");
+
+        Path unknownTypeDir = tempDir.resolve("unknown-type");
+        Path nestedDir = unknownTypeDir.resolve("a/a");
+        Files.createDirectories(nestedDir);
+
+        // Simulate a collision by creating a file with the same hash-based name
+        Files.writeString(nestedDir.resolve("aabbccddeeff.txt"), "existing content");
+
+        when(config.getUnknownTypeDir()).thenReturn(unknownTypeDir.toString());
+        // Both files have same hash for simplicity in this test case to trigger
+        // collision logic
+        when(hashService.calculateSHA256(any())).thenReturn("aabbccddeeff");
+
+        fileProcessorService.processFile(inputFile1);
+
+        // Expected path: unknown-type/a/a/aabbccddeeff-1.txt
+        Path expectedPath = nestedDir.resolve("aabbccddeeff-1.txt");
+        assertTrue(Files.exists(expectedPath), "Collision should result in a -1 suffix");
+        assertEquals("content1", Files.readString(expectedPath));
+    }
 }
