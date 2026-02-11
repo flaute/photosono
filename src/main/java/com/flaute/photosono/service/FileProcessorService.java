@@ -75,14 +75,12 @@ public class FileProcessorService {
         Path unknownTypeBaseDir = Paths.get(config.getUnknownTypeDir(), sha256.substring(0, 1), sha256.substring(1, 2));
         Files.createDirectories(unknownTypeBaseDir);
 
-        String baseName = sha256;
-        String ext = (extension.isEmpty() ? "" : "." + extension);
-        Path targetFile = unknownTypeBaseDir.resolve(baseName + ext);
+        String fileName = sha256 + (extension.isEmpty() ? "" : "." + extension);
+        Path targetFile = unknownTypeBaseDir.resolve(fileName);
 
-        int counter = 1;
-        while (Files.exists(targetFile)) {
-            targetFile = unknownTypeBaseDir.resolve(baseName + "-" + counter + ext);
-            counter++;
+        if (Files.exists(targetFile)) {
+            logger.info("Unknown type file already exists, skipping: {}", targetFile);
+            return Result.SKIPPED;
         }
 
         Files.copy(source, targetFile);
