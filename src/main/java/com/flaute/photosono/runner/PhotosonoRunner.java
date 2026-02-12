@@ -1,5 +1,6 @@
 package com.flaute.photosono.runner;
 
+import com.flaute.photosono.config.PhotosonoConfig;
 import com.flaute.photosono.service.FileScannerService;
 import com.flaute.photosono.service.TimelineScannerService;
 import org.slf4j.Logger;
@@ -17,29 +18,53 @@ public class PhotosonoRunner implements CommandLineRunner {
     private final FileScannerService fileScannerService;
     private final TimelineScannerService timelineScannerService;
     private final ApplicationContext context;
+    private final PhotosonoConfig config;
 
     public PhotosonoRunner(FileScannerService fileScannerService, TimelineScannerService timelineScannerService,
-            ApplicationContext context) {
+            ApplicationContext context, PhotosonoConfig config) {
         this.fileScannerService = fileScannerService;
         this.timelineScannerService = timelineScannerService;
         this.context = context;
+        this.config = config;
     }
 
     @Override
     public void run(String... args) {
         try {
-            logger.info("Starting sequential execution...");
+            boolean runDedupe = false;
+            boolean runTimeline = false;
 
-            logger.info("Executing Phase 1: Deduplication (Input -> Originals)");
-            fileScannerService.scanInputDirectory();
+            if (args.length == 0) {
+                runDedupe = config.getDeduplication().isEnabled();
+                runTimeline = config.getTimeline().isEnabled();
+                logger.info("No arguments provided. Using configuration: dedupe={}, timeline={}", runDedupe,
+                        runTimeline);
+            } else {
+                for (String arg : args) {
+                    if ("dedupe".equalsIgnoreCase(arg)) {
+                        runDedupe = true;
+                    } else if ("timeline".equalsIgnoreCase(arg)) {
+                        runTimeline = true;
+                    }
+                }
+                logger.info("Arguments provided. Executing specified phases: dedupe={}, timeline={}", runDedupe,
+                        runTimeline);
+            }
 
-            logger.info("Executing Phase 2: Timeline Organization (Originals -> Timeline)");
-            timelineScannerService.scanOriginalsDirectory();
+            if (runDedupe) {
+                logger.info("Executing Phase 1: Deduplication (Input -> Originals)");
+                fileScannerService.scanInputDirectory();
+            }
+
+            if (runTimeline) {
+                logger.info("Executing Phase 2: Timeline Organization (Originals -> Timeline)");
+                timelineScannerService.scanOriginalsDirectory();
+            }
 
             logger.info("Processing complete. Application will now exit.");
 
         } catch (Exception e) {
-            logger.error("Error during sequential execution", e);
+            logger.error("Error during execution", e);
         } finally {
             SpringApplication.exit(context, () -> 0);
         }
