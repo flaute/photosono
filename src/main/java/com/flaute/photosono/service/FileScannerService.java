@@ -43,6 +43,7 @@ public class FileScannerService {
         AtomicInteger skipped = new AtomicInteger(0);
         AtomicInteger unknownType = new AtomicInteger(0);
         AtomicInteger corrupted = new AtomicInteger(0);
+        AtomicInteger invalidSize = new AtomicInteger(0);
         AtomicInteger errors = new AtomicInteger(0);
 
         try (Stream<Path> paths = Files.walk(inputPath)) {
@@ -55,6 +56,7 @@ public class FileScannerService {
                             case SKIPPED -> skipped.incrementAndGet();
                             case UNKNOWN_TYPE -> unknownType.incrementAndGet();
                             case CORRUPTED -> corrupted.incrementAndGet();
+                            case INVALID_SIZE -> invalidSize.incrementAndGet();
                             case ERROR -> errors.incrementAndGet();
                         }
                     });
@@ -68,6 +70,7 @@ public class FileScannerService {
         logger.info("Duplicates skipped:  {}", skipped.get());
         logger.info("Unknown type:        {}", unknownType.get());
         logger.info("Corrupted files:      {}", corrupted.get());
+        logger.info("Invalid size:        {}", invalidSize.get());
         if (errors.get() > 0) {
             logger.error("Errors encountered:  {}", errors.get());
         }

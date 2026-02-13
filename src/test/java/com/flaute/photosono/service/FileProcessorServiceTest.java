@@ -44,13 +44,47 @@ class FileProcessorServiceTest {
         Files.createDirectories(originalsBaseDir);
 
         when(config.getOriginalsDir()).thenReturn(originalsBaseDir.toString());
+        when(config.getMinWidth()).thenReturn(10);
+        when(config.getMinHeight()).thenReturn(10);
         when(hashService.calculateSHA256(inputFile)).thenReturn("aabbccddeeff");
 
         FileProcessorService.Result result = fileProcessorService.processFile(inputFile);
 
+        // Minimal JPEG doesn't have dimensions in these 4 bytes, so it returns
+        // PROCESSED (defaulting to true)
         assertEquals(FileProcessorService.Result.PROCESSED, result);
-        // Expected path: originals/a/a/aabbccddeeff.jpg
         Path expectedPath = originalsBaseDir.resolve("a/a/aabbccddeeff.jpg");
+        assertTrue(Files.exists(expectedPath));
+    }
+
+    @Test
+    void testProcessInvalidSizeFile() throws IOException, NoSuchAlgorithmException {
+        Path inputFile = tempDir.resolve("small.png");
+        // Minimal 1x1 PNG
+        byte[] pngBytes = new byte[] {
+                (byte) 0x89, (byte) 0x50, (byte) 0x4E, (byte) 0x47, (byte) 0x0D, (byte) 0x0A, (byte) 0x1A, (byte) 0x0A,
+                0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+                0x00, 0x00, 0x00, 0x01, // width: 1
+                0x00, 0x00, 0x00, 0x01, // height: 1
+                0x08, 0x02, 0x00, 0x00, 0x00, (byte) 0x90, 0x77, 0x53, (byte) 0xDE,
+                0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41, 0x54, 0x08, (byte) 0xD7, 0x63, (byte) 0xF8, (byte) 0xFF,
+                (byte) 0xFF, 0x3F, 0x00, 0x05, (byte) 0xFE, 0x02, (byte) 0xFE, (byte) 0xDC, 0x44, 0x74, (byte) 0x8E,
+                0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, (byte) 0xAE, 0x42, 0x60, (byte) 0x82
+        };
+        Files.write(inputFile, pngBytes);
+
+        Path invalidSizeDir = tempDir.resolve("invalid-size");
+        Files.createDirectories(invalidSizeDir);
+
+        when(config.getInvalidSizeDir()).thenReturn(invalidSizeDir.toString());
+        when(config.getMinWidth()).thenReturn(100);
+        when(config.getMinHeight()).thenReturn(100);
+        when(hashService.calculateSHA256(inputFile)).thenReturn("112233445566");
+
+        FileProcessorService.Result result = fileProcessorService.processFile(inputFile);
+
+        assertEquals(FileProcessorService.Result.INVALID_SIZE, result);
+        Path expectedPath = invalidSizeDir.resolve("1/1/112233445566.png");
         assertTrue(Files.exists(expectedPath));
     }
 

@@ -9,6 +9,7 @@ services:
       - /mnt/usbhdd3/data/unknown-date:/unknown-date
       - /mnt/usbhdd3/data/unknown-type:/unknown-type
       - /mnt/usbhdd3/data/corrupted:/corrupted
+      - /mnt/usbhdd3/data/invalid-size:/invalid-size
     environment:
       - PHOTOSONO_INPUT_DIR=/input
       - PHOTOSONO_ORIGINALS_DIR=/originals
@@ -16,3 +17,6 @@ services:
       - PHOTOSONO_UNKNOWN_DATE_DIR=/unknown-date
       - PHOTOSONO_UNKNOWN_TYPE_DIR=/unknown-type
       - PHOTOSONO_CORRUPTED_DIR=/corrupted
+      - PHOTOSONO_INVALID_SIZE_DIR=/invalid-size
+      - PHOTOSONO_MIN_WIDTH=100
+      - PHOTOSONO_MIN_HEIGHT=100

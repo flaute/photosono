@@ -13,6 +13,9 @@ public class PhotosonoConfig {
     private String unknownDateDir;
     private String unknownTypeDir;
     private String corruptedDir;
+    private String invalidSizeDir;
+    private int minWidth = 100; // Default values
+    private int minHeight = 100;
     private Deduplication deduplication = new Deduplication();
     private Timeline timeline = new Timeline();
 
@@ -62,6 +65,30 @@ public class PhotosonoConfig {
 
     public void setCorruptedDir(String corruptedDir) {
         this.corruptedDir = corruptedDir;
+    }
+
+    public String getInvalidSizeDir() {
+        return invalidSizeDir;
+    }
+
+    public void setInvalidSizeDir(String invalidSizeDir) {
+        this.invalidSizeDir = invalidSizeDir;
+    }
+
+    public int getMinWidth() {
+        return minWidth;
+    }
+
+    public void setMinWidth(int minWidth) {
+        this.minWidth = minWidth;
+    }
+
+    public int getMinHeight() {
+        return minHeight;
+    }
+
+    public void setMinHeight(int minHeight) {
+        this.minHeight = minHeight;
     }
 
     public Deduplication getDeduplication() {
