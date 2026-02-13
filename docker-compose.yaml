@@ -8,9 +8,11 @@ services:
       - /mnt/usbhdd3/data/timeline:/timeline
       - /mnt/usbhdd3/data/unknown-date:/unknown-date
       - /mnt/usbhdd3/data/unknown-type:/unknown-type
+      - /mnt/usbhdd3/data/corrupted:/corrupted
     environment:
       - PHOTOSONO_INPUT_DIR=/input
       - PHOTOSONO_ORIGINALS_DIR=/originals
       - PHOTOSONO_TIMELINE_DIR=/timeline
       - PHOTOSONO_UNKNOWN_DATE_DIR=/unknown-date
       - PHOTOSONO_UNKNOWN_TYPE_DIR=/unknown-type
+      - PHOTOSONO_CORRUPTED_DIR=/corrupted

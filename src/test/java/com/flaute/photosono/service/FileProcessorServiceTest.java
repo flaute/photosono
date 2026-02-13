@@ -36,8 +36,9 @@ class FileProcessorServiceTest {
 
     @Test
     void testProcessFile() throws IOException, NoSuchAlgorithmException {
-        Path inputFile = tempDir.resolve("test.JPG"); // Test extension normalization
-        Files.writeString(inputFile, "content");
+        Path inputFile = tempDir.resolve("test.JPG");
+        // Minimal JPEG: Start of Image (FF D8) + End of Image (FF D9)
+        Files.write(inputFile, new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xD9 });
 
         Path originalsBaseDir = tempDir.resolve("originals");
         Files.createDirectories(originalsBaseDir);
@@ -45,11 +46,30 @@ class FileProcessorServiceTest {
         when(config.getOriginalsDir()).thenReturn(originalsBaseDir.toString());
         when(hashService.calculateSHA256(inputFile)).thenReturn("aabbccddeeff");
 
-        fileProcessorService.processFile(inputFile);
+        FileProcessorService.Result result = fileProcessorService.processFile(inputFile);
 
+        assertEquals(FileProcessorService.Result.PROCESSED, result);
         // Expected path: originals/a/a/aabbccddeeff.jpg
         Path expectedPath = originalsBaseDir.resolve("a/a/aabbccddeeff.jpg");
         assertTrue(Files.exists(expectedPath));
+    }
+
+    @Test
+    void testProcessCorruptedFile() throws IOException, NoSuchAlgorithmException {
+        Path inputFile = tempDir.resolve("corrupted.JPG");
+        Files.writeString(inputFile, "not a jpeg");
+
+        Path corruptedBaseDir = tempDir.resolve("corrupted");
+        Files.createDirectories(corruptedBaseDir);
+
+        when(config.getCorruptedDir()).thenReturn(corruptedBaseDir.toString());
+        when(hashService.calculateSHA256(inputFile)).thenReturn("112233445566");
+
+        FileProcessorService.Result result = fileProcessorService.processFile(inputFile);
+
+        assertEquals(FileProcessorService.Result.CORRUPTED, result);
+        Path expectedPath = corruptedBaseDir.resolve("1/1/112233445566.jpg");
+        assertTrue(Files.exists(expectedPath), "Corrupted file should be moved to corrupted directory");
     }
 
     @Test

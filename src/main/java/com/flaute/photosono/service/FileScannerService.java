@@ -42,6 +42,7 @@ public class FileScannerService {
         AtomicInteger processed = new AtomicInteger(0);
         AtomicInteger skipped = new AtomicInteger(0);
         AtomicInteger unknownType = new AtomicInteger(0);
+        AtomicInteger corrupted = new AtomicInteger(0);
         AtomicInteger errors = new AtomicInteger(0);
 
         try (Stream<Path> paths = Files.walk(inputPath)) {
@@ -53,6 +54,7 @@ public class FileScannerService {
                             case PROCESSED -> processed.incrementAndGet();
                             case SKIPPED -> skipped.incrementAndGet();
                             case UNKNOWN_TYPE -> unknownType.incrementAndGet();
+                            case CORRUPTED -> corrupted.incrementAndGet();
                             case ERROR -> errors.incrementAndGet();
                         }
                     });
@@ -65,6 +67,7 @@ public class FileScannerService {
         logger.info("Unique files copied: {}", processed.get());
         logger.info("Duplicates skipped:  {}", skipped.get());
         logger.info("Unknown type:        {}", unknownType.get());
+        logger.info("Corrupted files:      {}", corrupted.get());
         if (errors.get() > 0) {
             logger.error("Errors encountered:  {}", errors.get());
         }

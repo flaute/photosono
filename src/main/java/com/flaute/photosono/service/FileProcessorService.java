@@ -1,6 +1,7 @@
 package com.flaute.photosono.service;
 
 import com.flaute.photosono.config.PhotosonoConfig;
+import com.drew.imaging.ImageMetadataReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,8 @@ public class FileProcessorService {
         PROCESSED,
         SKIPPED,
         UNKNOWN_TYPE,
-        ERROR
+        ERROR,
+        CORRUPTED
     }
 
     private static final Map<String, String> EXTENSION_NORMALIZATION = Map.of(
@@ -51,6 +53,10 @@ public class FileProcessorService {
                 return copyToUnknownType(file, sha256, extension);
             }
 
+            if (!isValidMedia(file)) {
+                return moveToCorrupted(file, sha256, extension);
+            }
+
             Path originalsDir = Paths.get(config.getOriginalsDir(), sha256.substring(0, 1), sha256.substring(1, 2));
             Files.createDirectories(originalsDir);
 
@@ -69,6 +75,35 @@ public class FileProcessorService {
             logger.error("Error processing file: {}", file, e);
             return Result.ERROR;
         }
+    }
+
+    private boolean isValidMedia(Path path) {
+        try {
+            // For images and videos, metadata-extractor will throw an exception if the file
+            // structure is invalid
+            ImageMetadataReader.readMetadata(path.toFile());
+            return true;
+        } catch (Exception e) {
+            logger.warn("File validation failed for {}: {}", path, e.getMessage());
+            return false;
+        }
+    }
+
+    private Result moveToCorrupted(Path source, String sha256, String extension) throws Exception {
+        Path corruptedBaseDir = Paths.get(config.getCorruptedDir(), sha256.substring(0, 1), sha256.substring(1, 2));
+        Files.createDirectories(corruptedBaseDir);
+
+        String fileName = sha256 + (extension.isEmpty() ? "" : "." + extension);
+        Path targetFile = corruptedBaseDir.resolve(fileName);
+
+        if (Files.exists(targetFile)) {
+            logger.info("Corrupted file already exists, skipping: {}", targetFile);
+            return Result.SKIPPED;
+        }
+
+        Files.copy(source, targetFile);
+        logger.warn("Moved corrupted file {} to {}", source, targetFile);
+        return Result.CORRUPTED;
     }
 
     private Result copyToUnknownType(Path source, String sha256, String extension) throws Exception {

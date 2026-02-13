@@ -12,6 +12,7 @@ public class PhotosonoConfig {
     private String timelineDir;
     private String unknownDateDir;
     private String unknownTypeDir;
+    private String corruptedDir;
     private Deduplication deduplication = new Deduplication();
     private Timeline timeline = new Timeline();
 
@@ -53,6 +54,14 @@ public class PhotosonoConfig {
 
     public void setUnknownTypeDir(String unknownTypeDir) {
         this.unknownTypeDir = unknownTypeDir;
+    }
+
+    public String getCorruptedDir() {
+        return corruptedDir;
+    }
+
+    public void setCorruptedDir(String corruptedDir) {
+        this.corruptedDir = corruptedDir;
     }
 
     public Deduplication getDeduplication() {
