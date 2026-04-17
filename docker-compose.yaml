@@ -3,7 +3,7 @@ services:
     build: .
     restart: "no"
     volumes:
-      - /mnt/usbhdd4/data/pics/new:/input
+      - /mnt/usbhdd4/data/pics:/input
       - /mnt/usbhdd3/data/originals:/originals
       - /mnt/usbhdd3/data/timeline:/timeline
       - /mnt/usbhdd3/data/unknown-date:/unknown-date
@@ -20,3 +20,5 @@ services:
       - PHOTOSONO_INVALID_SIZE_DIR=/invalid-size
       - PHOTOSONO_MIN_WIDTH=100
       - PHOTOSONO_MIN_HEIGHT=100
+      - PHOTOSONO_DEDUPLICATION_ENABLED=true
+      - PHOTOSONO_TIMELINE_ENABLED=false
